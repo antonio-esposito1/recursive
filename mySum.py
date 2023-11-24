@@ -9,6 +9,10 @@ def mysum2(L):
 
 def mysum3(L):
     return L[0] if len(L) == 1 else L[0] + mysum3(L[1:])
+
+def mysum4(L):
+    first, *rest = L
+    return first if not rest else first + mysum4(rest)
     
 #print(mysum([1,2,3,4]))
 
