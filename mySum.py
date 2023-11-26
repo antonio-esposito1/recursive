@@ -27,3 +27,18 @@ def intersect(seq1, seq2):
     return res
 
     
+def f1():
+    X = 88
+    def f2():
+        print(X)
+    return f2
+action = f1()
+
+def maker(N):
+    def action(X):
+        return X ** N
+    return action
+
+def makerLambda(N):
+    return lambda X: X ** N
+
