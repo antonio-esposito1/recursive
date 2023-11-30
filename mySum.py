@@ -42,3 +42,31 @@ def maker(N):
 def makerLambda(N):
     return lambda X: X ** N
 
+def tester(start):
+    state = start
+    def nested(lable):
+        nonlocal state
+        print(lable, state)
+        state += 1
+    return nested
+
+def f(*args): print(args)
+
+def g(**args): print(args)
+
+
+def h(a, *pargs, **kargs): print(a, pargs, kargs)
+
+def i(a,b,c,d): print(a,b,c,d)
+
+def l(**args): print(args)
+
+def tracer(func, *pargs, **kargs):
+    print('calling', func.__name__)
+    return func(*pargs, **kargs)
+
+def func(a,b,c,d) : return a + b + c + d
+
+def konly(a, *b, c): print(a, b, c)
+
+def konly2(a, *, b, c): print(a, b, c)

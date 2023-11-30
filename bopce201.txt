@@ -1,0 +1,410 @@
+RP/0/RP0/CPU0:BOPCE201#sh run all
+Wed Nov 29 14:41:31.968 CET
+Building configuration...
+!! IOS XR Configuration 7.7.1
+!! Last configuration change at Tue Nov 28 00:24:31 2023 by cisco
+!
+hostname BOPCE201
+aaa default-taskgroup operator
+clock timezone CET Europe/Rome
+banner motd ^c
+!
+This is a Vodafone Italy device; usage of this system constitutes agreement with the company's policy and procedure. The system is restricted for use; all the actions on the system can always be located and traceable. All improper use of the system will be pursued according to applicable statutory and/or contract
+laws.
+Questo e' un apparato di proprieta' Vodafone Italy ;il sistema va utilizzato in accordo con le policy e le procedure aziendali. Il sistema ha un accesso limitato; tutte le azioni eseguite su di esso possono essere individuabili e rintracciabili in ogni momento. Un utilizzo improprio del sistema verra' perseguito secondo tutte le norme di legge e di contratto applicabili.
+
+^c
+logging trap notifications
+logging events level informational
+logging console disable
+logging monitor debugging
+logging buffered 10000000
+logging facility local5
+logging 10.178.20.196 vrf CNC_TRUSTED_MGMT severity info port default
+logging 10.178.20.231 vrf CNC_TRUSTED_MGMT severity info port default
+logging 10.132.181.132 vrf CNC_TRUSTED_MGMT severity info port default
+logging suppress rule NO-LOGIN-MSG
+ alarm SECURITY SSHD INFO_SUCCESS
+ alarm SECURITY SSHD WARNING_LOGIN
+ alarm SECURITY SSHD INFO_USER_LOGOUT
+!
+logging suppress apply rule NO-LOGIN-MSG
+ source location 0/RP0/CPU0
+ source location 0/RP1/CPU0
+!
+logging source-interface GigabitEthernet0/0/0/0 vrf CNC_TRUSTED_MGMT
+logging suppress duplicates
+service timestamps log datetime localtime msec show-timezone
+service timestamps debug datetime localtime msec show-timezone
+logging events link-status software-interfaces
+domain name cisco.com
+domain lookup disable
+tacacs source-interface GigabitEthernet0/0/0/1 vrf CNC_TRUSTED_MGMT
+tacacs-server host 10.132.181.10 port 49
+!
+tacacs-server host 10.132.181.11 port 49
+!
+tacacs-server ipv4 dscp af41
+tacacs-server key 7 141D071F1E0D672C362D3E3A
+username cisco
+ group root-lr
+ group cisco-support
+ secret 10 $6$VbRVONLc43e/O...$j4PcLS/24tmWkp8Nm8K0./XWB.zojPeU/.FThckaHb1VZJul5AKKhOyASumq.AZcwyblRiDZeBmzGuG8JvFxC/
+!
+username admin
+ group root-lr
+ group cisco-support
+ secret 10 $6$z46SS//WbLst3S/.$jeYHq7/tuZOXIa2lkPDZ3.SU7lhHjoxZiMCZ9RpyW11qI7K4jt0JVnQz6WJKd9vosgl.Mz4aEAl6PhfN5jRwL/
+!
+aaa accounting exec default start-stop group tacacs_group
+aaa accounting system default start-stop group tacacs_group
+aaa accounting network default start-stop group tacacs_group
+aaa accounting commands default start-stop group tacacs_group
+aaa group server tacacs+ tacacs_group
+ server 10.132.181.10
+ server 10.132.181.11
+ vrf CNC_TRUSTED_MGMT
+!
+aaa authorization exec default group tacacs_group none
+aaa authorization network default none
+aaa authorization commands default group tacacs_group none
+aaa authentication login default group tacacs_group local
+pce
+ address ipv4 10.176.84.1
+ api
+  user cisco
+   password encrypted 01300F175804575D720D
+  !
+  user cnc_srpce
+   password encrypted 040D1A27047D4E4B502E5D22593C1B2338
+  !
+  vrf CNC_TRUSTED_MGMT
+ !
+ logging
+  pcep pcerr-received
+  no-path
+  fallback
+  disjointness-status
+ !
+ peer-filter ipv4 access-list PCC-PEERS
+!
+vrf CNC_TRUSTED_MGMT
+ address-family ipv4 unicast
+  import route-target
+   30722:1240
+  !
+  export route-target
+   30722:1240
+  !
+ !
+!
+tcp ao
+ keychain BGP-LS-SRPCE-VIPNET
+  key 1 SendID 100 ReceiveID 100
+ !
+!
+tcp window-size 65535
+tcp path-mtu-discovery
+line template TACACS
+ exec-timeout 10 0
+ length 30
+ access-class ingress acl_99
+ transport input ssh
+ transport output none
+ transport preferred none
+!
+vty-pool default 0 9 line-template TACACS
+snmp-server ifmib ifalias long
+snmp-server ifindex persist
+snmp-server ifmib internal cache max-duration 0
+interface MgmtEth0/RP0/CPU0/0
+!
+interface GigabitEthernet0/0/0/0
+!
+interface GigabitEthernet0/0/0/1
+!
+interface GigabitEthernet0/0/0/2
+!
+interface GigabitEthernet0/0/0/3
+!
+interface GigabitEthernet0/0/0/4
+!
+interface GigabitEthernet0/0/0/5
+!
+interface GigabitEthernet0/0/0/6
+!
+snmp-server vrf CNC_TRUSTED_MGMT
+ host 10.178.131.40 traps version 3 priv MEM-USER
+ host 10.178.159.52 traps version 3 priv MEM-USER
+!
+snmp-server ipv4 dscp af41
+snmp-server user WM-USER SNMPv3-GROUP v3 auth sha encrypted 05250338654243392F03471C581F2C2B7976 priv aes 128 encrypted 130B44054F22093A1D22783D667041261310 IPv4 acl_SNMPv3
+snmp-server user XP-USER SNMPv3-GROUP v3 auth sha encrypted 01212D37775202012008450D110A22070738 priv aes 128 encrypted 097D5B080F504316070A472E240D1D0A6D75 IPv4 acl_SNMPv3
+snmp-server user MEM-USER SNMPv3-GROUP v3 auth sha encrypted 091A5D5E2C101651010957782434183C1C priv aes 128 encrypted 00420002530D180A56321466050A021320 IPv4 acl_SNMPv3
+snmp-server user addm_usr SNMPv3_GROUP v3 auth sha encrypted 133C110724472B033F3E10 priv aes 128 encrypted 10651F4E5C313B56262C0E IPv4 acl_SNMPv3
+snmp-server user CISCO-USER SNMPv3-GROUP v3 auth sha encrypted 107E2D5455021C3C38343D60051C203A362654 priv aes 128 encrypted 13372E225B5F117E19086B3A270445542B42 IPv4 acl_SNMPv3
+snmp-server user HP_NA-USER SNMPv3-GROUP v3 auth sha encrypted 14270B525C0024112523373D2D3C561A priv aes 128 encrypted 075A7548420F1D0A22062E2531737A771F IPv4 acl_SNMPv3
+snmp-server view SNMPv3-VIEW iso included
+snmp-server view exclude_all 1 excluded
+snmp-server group SNMPv3-GROUP v3 priv notify SNMPv3-VIEW read SNMPv3-VIEW write exclude_all IPv4 acl_SNMPv3
+snmp-server queue-length 200
+snmp-server trap-timeout 10
+snmp-server traps rf
+snmp-server traps bfd
+snmp-server traps ntp
+snmp-server traps copy-complete
+snmp-server traps snmp
+snmp-server traps snmp linkup
+snmp-server traps snmp linkdown
+snmp-server traps snmp coldstart
+snmp-server traps snmp warmstart
+snmp-server traps snmp authentication
+snmp-server traps config
+snmp-server traps syslog
+snmp-server traps system
+snmp-server traps entity-state operstatus
+snmp-server traps entity-state switchover
+snmp-server traps entity-redundancy all
+snmp-server contact DL-TNOCoreIPBB@vodafone.com
+snmp-server location Via Ca' Dellorbo Nord, 37 - CASTENASO - BO
+snmp-server trap-source GigabitEthernet0/0/0/0
+ipv4 conflict-policy static
+ipv6 conflict-policy static
+ftp client vrf CNC_TRUSTED_MGMT source-interface GigabitEthernet0/0/0/0
+ntp
+ authentication-key 11 md5 encrypted 15435A0350133B207114132B250E0052
+ authentication-key 12 md5 encrypted 0355093F140A15597E021D5C4F1D2758
+ authentication-key 13 md5 encrypted 055A550B185F1710400E13225318117E
+ authentication-key 14 md5 encrypted 0870184A204C0C221752543D1C22307C
+ authenticate
+ trusted-key 11
+ trusted-key 12
+ trusted-key 13
+ trusted-key 14
+ server vrf CNC_TRUSTED_MGMT 10.178.6.20 key 11
+ server vrf CNC_TRUSTED_MGMT 10.178.6.28 key 12
+ server vrf CNC_TRUSTED_MGMT 10.178.147.205 key 13 prefer
+ server vrf CNC_TRUSTED_MGMT 10.178.203.176 key 14
+ access-group vrf CNC_TRUSTED_MGMT ipv4 peer acl_NTP_PERMIT_SERVERS
+ access-group vrf CNC_TRUSTED_MGMT ipv4 serve-only acl_NTP_DENYALL
+ source vrf CNC_TRUSTED_MGMT GigabitEthernet0/0/0/0
+ update-calendar
+!
+tftp client vrf CNC_TRUSTED_MGMT source-interface GigabitEthernet0/0/0/0
+key chain BGP-LS-SRPCE-VIPNET
+ key 1
+  accept-lifetime 00:00:00 january 01 2012 infinite
+  key-string password 046E215142101F1D06350D432001325C69
+  send-lifetime 00:00:00 january 01 2012 infinite
+  cryptographic-algorithm AES-128-CMAC-96
+ !
+!
+call-home
+ service active
+ contact smart-licensing
+ profile CiscoTAC-1
+  active
+  destination transport-method email disable
+  destination transport-method http
+ !
+!
+ipv4 access-list acl_99
+ 10 remark Accessi autorizzati in ssh
+ 20 remark Macchine Ponte
+ 30 permit ipv4 host 10.192.10.7 any
+ 40 permit ipv4 host 10.192.10.8 any
+ 45 permit ipv4 host 10.178.202.28 any
+ 50 remark HP-NA
+ 60 permit ipv4 host 10.178.6.42 any
+ 70 permit ipv4 host 10.178.6.43 any
+ 75 permit ipv4 host 10.178.159.57 any
+ 80 remark Bridge Server for Noc Romania and NSU Fulfillment
+ 90 permit ipv4 host 85.205.247.215 any
+ 100 permit ipv4 host 85.205.247.216 any
+ 110 remark PowerCli
+ 115 permit ipv4 host 10.133.57.38 any
+ 116 permit ipv4 host 10.133.57.39 any
+ 120 permit ipv4 host 10.178.20.196 any
+ 130 permit ipv4 host 10.178.20.197 any
+ 140 permit ipv4 host 10.178.20.198 any
+ 150 remark CNC/CSPC
+ 160 permit ipv4 host 10.132.181.132 any
+!         
+ipv4 access-list PCC-PEERS
+ 10 permit ipv4 10.216.203.0 0.0.0.255 any
+ 20 permit ipv4 10.216.204.0 0.0.0.255 any
+ 30 permit ipv4 10.216.198.0 0.0.0.255 any
+ 40 permit ipv4 10.216.199.0 0.0.0.255 any
+ 50 permit ipv4 10.176.86.0 0.0.0.255 any
+ 1000 deny ipv4 any any
+!
+ipv4 access-list acl_SNMPv3
+ 10 remark SNMP Server Xspotter
+ 20 permit ipv4 host 10.178.6.138 any
+ 30 remark SNMP Server HP-NA
+ 40 permit ipv4 host 10.178.6.42 any
+ 50 permit ipv4 host 10.178.6.43 any
+ 55 permit ipv4 host 10.178.159.57 any
+ 60 remark SNMP Server MEM
+ 70 permit ipv4 host 10.178.131.36 any
+ 80 permit ipv4 host 10.178.131.37 any
+ 84 permit ipv4 host 10.178.159.53 any
+ 85 permit ipv4 host 10.178.159.54 any
+ 90 permit ipv4 host 10.178.131.40 any
+ 95 permit ipv4 host 10.178.159.52 any
+ 100 remark SNMP Server CNC/CSPC
+ 110 permit ipv4 host 10.132.181.132 any
+ 120 remark SNMP server weathermaps
+ 130 permit ipv4 85.205.61.64 0.0.0.31 any
+ 140 remark ADDM
+ 150 permit ipv4 host 10.133.220.209 any
+ 500 deny ipv4 any any log
+!
+ipv4 access-list acl_NETCONF
+ 10 remark powercli
+ 20 permit ipv4 host 10.178.20.198 any
+!
+ipv4 access-list acl_NTP_DENYALL
+ 10 deny ipv4 any any
+!
+ipv4 access-list acl_NTP_PERMIT_SERVERS
+ 10 permit ipv4 host 10.178.147.205 any
+ 20 permit ipv4 host 10.178.6.20 any
+ 30 permit ipv4 host 10.178.203.176 any
+ 40 permit ipv4 host 10.178.6.28 any
+!
+interface Loopback0
+ description logical interface srpce001-grt
+ ipv4 address 10.176.84.1 255.255.255.255
+!
+interface MgmtEth0/RP0/CPU0/0
+!
+interface GigabitEthernet0/0/0/0
+ description Data Interface to HPE_12904E_NVI_GRT Data Lan
+ vrf CNC_TRUSTED_MGMT
+ ipv4 address 10.177.116.30 255.255.255.192
+ ipv4 unreachables disable
+ ipv6 nd suppress-ra
+ ipv6 unreachables disable
+ load-interval 30
+ dampening 1 750 2000 4
+!
+interface GigabitEthernet0/0/0/1
+ description Management Interface to HPE_12904E_NVI_VRF NBI Lan
+ ipv4 address 192.168.68.230 255.255.255.192
+ ipv6 nd suppress-ra
+ ipv6 unreachables disable
+ dampening 1 750 2000 4
+!
+interface GigabitEthernet0/0/0/2
+ shutdown
+!
+interface GigabitEthernet0/0/0/3
+ shutdown
+!
+interface GigabitEthernet0/0/0/4
+ shutdown
+!
+interface GigabitEthernet0/0/0/5
+ shutdown
+!
+interface GigabitEthernet0/0/0/6
+ shutdown
+!
+route-policy DROP_ALL
+  drop
+end-policy
+!
+route-policy PASS_ALL
+  pass
+end-policy
+!
+router static
+ address-family ipv4 unicast
+  0.0.0.0/0 GigabitEthernet0/0/0/1 192.168.68.225
+ !
+ vrf CNC_TRUSTED_MGMT
+  address-family ipv4 unicast
+   0.0.0.0/0 GigabitEthernet0/0/0/0 10.177.116.62 tag 44957
+  !
+ !
+!
+snmp-server traps isis all
+snmp-server traps bgp cbgp2
+snmp-server traps bgp updown
+router bgp 30722
+ bgp router-id 10.176.84.1
+ nexthop resolution allow-default
+ address-family link-state link-state
+ !
+ neighbor-group BGP-LS-VF-IT-SDN-MBH
+  remote-as 65000
+  ebgp-multihop 10
+  password encrypted 03476D2F20420878033A3D2B5A302C3C49787B767B70
+  update-source Loopback0
+  address-family link-state link-state
+   route-policy PASS_ALL in
+   route-policy DROP_ALL out
+  !
+ !
+ neighbor-group BGP-LS-VF-IT-SDN-VIPNET
+  remote-as 30722
+  ao BGP-LS-SRPCE-VIPNET include-tcp-options enable
+  update-source Loopback0
+  address-family link-state link-state
+  !
+ !
+ neighbor 10.176.86.66
+  use neighbor-group BGP-LS-VF-IT-SDN-VIPNET
+  description BOVRR221
+ !
+ neighbor 10.216.198.255
+  use neighbor-group BGP-LS-VF-IT-SDN-MBH
+  description ANEBN0202
+ !
+ neighbor 10.216.199.254
+  use neighbor-group BGP-LS-VF-IT-SDN-MBH
+  description PEEBN0101
+ !
+ neighbor 10.216.199.255
+  use neighbor-group BGP-LS-VF-IT-SDN-MBH
+  description PEEBN0102
+ !
+!
+snmp-server traps hsrp
+snmp-server traps vpls all
+snmp-server traps l2vpn all
+snmp-server traps mpls traffic-eng up
+snmp-server traps mpls traffic-eng down
+snmp-server traps mpls traffic-eng reroute
+snmp-server traps mpls traffic-eng reoptimize
+snmp-server traps mpls ldp up
+snmp-server traps mpls ldp down
+snmp-server traps mpls ldp threshold
+snmp-server traps mpls l3vpn all
+snmp-server traps sensor
+snmp-server traps fru-ctrl
+snmp-server traps ospf lsa lsa-maxage
+snmp-server traps ospf lsa lsa-originate
+snmp-server traps ospf errors bad-packet
+snmp-server traps ospf errors authentication-failure
+snmp-server traps ospf errors config-error
+snmp-server traps ospf errors virt-bad-packet
+snmp-server traps ospf errors virt-authentication-failure
+snmp-server traps ospf errors virt-config-error
+snmp-server traps ospf retransmit packets
+snmp-server traps ospf retransmit virt-packets
+snmp-server traps ospf state-change if-state-change
+snmp-server traps ospf state-change neighbor-state-change
+snmp-server traps ospf state-change virtif-state-change
+snmp-server traps ospf state-change virtneighbor-state-change
+ssh server dscp 34
+ssh timeout 120
+ssh server rate-limit 10
+ssh server session-limit 10
+ssh server v2
+ssh server vrf CNC_TRUSTED_MGMT
+ssh server netconf vrf CNC_TRUSTED_MGMT ipv4 access-list acl_NETCONF
+end
+
+RP/0/RP0/CPU0:BOPCE201#
