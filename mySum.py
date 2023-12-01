@@ -70,3 +70,31 @@ def func(a,b,c,d) : return a + b + c + d
 def konly(a, *b, c): print(a, b, c)
 
 def konly2(a, *, b, c): print(a, b, c)
+
+def min1(*args):
+    res = args[0]
+    for arg in args[1:]:
+        if arg < res:
+            res = arg
+    return res
+
+def min2(first, *rest):
+    for arg in rest:
+        if arg < first:
+            first = arg
+    return first
+
+def min3(*args):
+    tmp = list(args)
+    tmp.sort()
+    return tmp[0]
+
+def minmax(test, *args):
+    res = args[0]
+    for arg in args[1:]:
+        if test(arg, res):
+            res = arg
+    return res
+
+def lessthen(x,y): return x < y
+def grtrthen(x,y): return x > y 
